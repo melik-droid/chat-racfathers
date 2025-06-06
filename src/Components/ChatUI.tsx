@@ -137,7 +137,7 @@ const ChatUI: React.FC = () => {
           }}
         />
         <div className="flex-1 px-8 py-8 overflow-y-auto flex flex-col gap-6 bg-transparent relative z-10">
-          <div className="relative z-10">
+          <div className="relative z-10 h-full">
             {loadingChat ? (
               <LoadingSpinner />
             ) : (
