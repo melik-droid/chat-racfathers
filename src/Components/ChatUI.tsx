@@ -4,6 +4,7 @@ import LoadingSpinner from "./LoadingSpinner";
 import TypingIndicator from "./TypingIndicator";
 import { AGENT_AVATAR, initialChats } from "./chatConstants";
 import type { Message, Chat } from "./chatTypes";
+import bg from "../assets/bg.png";
 
 const ChatUI: React.FC = () => {
   const [chats, setChats] = useState<Chat[]>(initialChats);
@@ -123,19 +124,19 @@ const ChatUI: React.FC = () => {
         </div>
       </aside>
       {/* Main Chat Area */}
-      <main className="flex-1 flex flex-col pt-14 relative">
+      <main className="flex-1 flex flex-col pt-14 relative overflow-hidden">
+        {/* Background image with dim overlay only for chat area */}
+        <div
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{
+            backgroundImage: `url(${bg})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            filter: "brightness(0.3)",
+            opacity: 0.7,
+          }}
+        />
         <div className="flex-1 px-8 py-8 overflow-y-auto flex flex-col gap-6 bg-transparent relative z-10">
-          {/* Background image with dim overlay only for chat area */}
-          <div
-            className="absolute inset-0 z-0 pointer-events-none"
-            style={{
-              backgroundImage: "url(/src/assets/bg.png)",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              filter: "brightness(0.3)",
-              opacity: 0.7,
-            }}
-          />
           <div className="relative z-10">
             {loadingChat ? (
               <LoadingSpinner />
@@ -170,7 +171,7 @@ const ChatUI: React.FC = () => {
           </div>
         </div>
         <form
-          className="flex items-center px-8 py-5 bg-zinc-900 border-t border-zinc-800"
+          className="flex items-center px-8 py-5 bg-zinc-900 border-t border-zinc-800 relative z-10"
           onSubmit={handleSend}
         >
           <input

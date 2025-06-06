@@ -1,11 +1,12 @@
 import React from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import RacfathersLogo from "../assets/RacFathers-Logo.svg";
 
 const Navbar: React.FC = () => (
   <nav className="fixed top-0 left-0 right-0 h-14 bg-zinc-950 border-b border-zinc-800 flex items-center px-6 z-10">
     <span className="text-lg font-bold tracking-wide flex items-center gap-2">
       <img
-        src="/src/assets/RacFathers-Logo.svg"
+        src={RacfathersLogo}
         alt="RacFathers Logo"
         style={{ height: "47px" }}
       />

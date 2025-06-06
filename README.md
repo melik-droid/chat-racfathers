@@ -52,3 +52,21 @@ export default tseslint.config({
   },
 })
 ```
+
+# GitHub Pages Deployment
+
+To deploy this project to GitHub Pages:
+
+1. Push your code to a public GitHub repository named `chat-racfathers`.
+2. In your repository, go to Settings → Pages and set the source to the `gh-pages` branch.
+3. Run the following command to deploy:
+
+```sh
+npm run deploy
+```
+
+Your app will be available at:
+
+    https://<your-github-username>.github.io/chat-racfathers/
+
+Make sure to update the `homepage` field in `package.json` with your actual GitHub username.
