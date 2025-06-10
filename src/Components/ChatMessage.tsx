@@ -16,9 +16,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isLatest, isNewMessa
         <img
           src={AGENT_AVATAR}
           alt="Agent"
-          className="w-9 h-9 rounded-full mr-3 mt-1"
+          className="w-9 h-9 rounded-full mr-2 md:mr-3 mt-1"
         />
-        <div className="max-w-lg px-5 py-3 rounded-2xl text-base break-words bg-zinc-800/80 backdrop-blur-sm text-white shadow-lg">
+        <div className="max-w-lg px-4 md:px-5 py-3 rounded-2xl text-base break-words bg-zinc-800/80 backdrop-blur-sm text-white shadow-lg">
           <TypedMessage 
             text={message.text} 
             isLatest={isLatest && isNewMessage}
@@ -30,7 +30,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isLatest, isNewMessa
 
   return (
     <div className="flex justify-end">
-      <div className="max-w-lg px-5 py-3 rounded-2xl text-base break-words bg-zinc-700/80 backdrop-blur-sm text-white shadow-lg">
+      <div className="max-w-lg px-4 md:px-5 py-3 rounded-2xl text-base break-words bg-zinc-700/80 backdrop-blur-sm text-white shadow-lg">
         {message.text}
       </div>
     </div>

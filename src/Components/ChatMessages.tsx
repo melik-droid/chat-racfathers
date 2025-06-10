@@ -28,14 +28,15 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
   }
 
   return (
-    <div className="animate-fadein">
+    <div className="animate-fadein space-y-4">
       {messages.map((msg, index) => (
-        <ChatMessage
-          key={msg.id}
-          message={msg}
-          isLatest={index === messages.length - 1}
-          isNewMessage={isNewMessage}
-        />
+        <div key={msg.id} className="mb-4">
+          <ChatMessage
+            message={msg}
+            isLatest={index === messages.length - 1}
+            isNewMessage={isNewMessage}
+          />
+        </div>
       ))}
       {botTyping && <TypingIndicator />}
       <div ref={messagesEndRef} className="h-6" />

@@ -15,6 +15,7 @@ const ChatUI: React.FC = () => {
   const [loadingChat, setLoadingChat] = useState(false);
   const [botTyping, setBotTyping] = useState(false);
   const [isNewMessage, setIsNewMessage] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -86,6 +87,7 @@ const ChatUI: React.FC = () => {
     setSelectedChat(newChat);
     setMessages(newChat.history);
     setIsNewMessage(false);
+    setIsSidebarOpen(false);
     setTimeout(() => {
       setIsNewMessage(true);
       scrollToBottom();
@@ -105,14 +107,30 @@ const ChatUI: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-black text-white">
-      <Navbar />
-      <ChatSidebar
-        chats={chats}
-        selectedChat={selectedChat}
-        onSelectChat={handleSelectChat}
-        onNewChat={handleNewChat}
-      />
-      <main className="flex-1 flex flex-col pt-14 relative overflow-hidden">
+      <Navbar onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <div className={`md:relative md:translate-x-0 md:z-0 fixed inset-y-0 left-0 z-20 transform transition-transform duration-300 ease-in-out ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <ChatSidebar
+          chats={chats}
+          selectedChat={selectedChat}
+          onSelectChat={(chat) => {
+            handleSelectChat(chat);
+            setIsSidebarOpen(false);
+          }}
+          onNewChat={handleNewChat}
+        />
+      </div>
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-10 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+      <main 
+        className="flex-1 flex flex-col pt-14 relative overflow-hidden"
+        onClick={() => isSidebarOpen && setIsSidebarOpen(false)}
+      >
         <div
           className="absolute inset-0 z-0 pointer-events-none"
           style={{
@@ -123,7 +141,7 @@ const ChatUI: React.FC = () => {
             opacity: 0.7,
           }}
         />
-        <div className="flex-1 px-8 py-8 overflow-y-auto flex flex-col gap-6 bg-transparent relative z-10">
+        <div className="flex-1 px-4 md:px-8 py-6 overflow-y-auto flex flex-col gap-6 bg-transparent relative z-10">
           <div className="relative z-10 h-full">
             <ChatMessages
               messages={messages}

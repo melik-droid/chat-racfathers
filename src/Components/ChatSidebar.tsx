@@ -16,9 +16,9 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
   onNewChat,
 }) => {
   return (
-    <aside className="w-72 bg-zinc-900/95 backdrop-blur-sm border-r border-zinc-800 flex flex-col pt-14">
-      <div className="px-4 py-6 border-b border-zinc-800">
-        <h2 className="text-xl font-semibold text-white mb-1">Chats</h2>
+    <aside className="w-72 h-full bg-zinc-900/95 backdrop-blur-sm border-r border-zinc-800 flex flex-col pt-14 md:relative">
+      <div className="px-4 py-3 border-b border-zinc-800">
+        <h2 className="text-lg font-semibold text-white">Chats</h2>
         <p className="text-sm text-zinc-400">Your conversation history</p>
       </div>
       
