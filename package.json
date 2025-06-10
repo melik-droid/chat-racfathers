@@ -19,6 +19,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.8",
+    "typewriter-effect": "^2.22.0",
     "viem": "^2.30.6",
     "wagmi": "^2.15.5"
   },
