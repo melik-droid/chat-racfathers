@@ -23,39 +23,43 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <form
-      className="flex items-center px-8 py-5 bg-zinc-900 border-t border-zinc-800 relative z-10"
+      className="px-4 py-3 bg-zinc-900/95 backdrop-blur-sm border-t border-zinc-800 relative z-10"
       onSubmit={onSend}
     >
-      <input
-        ref={inputRef}
-        type="text"
-        value={input}
-        onChange={(e) => onInputChange(e.target.value)}
-        placeholder="Write a message"
-        className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-base outline-none mr-3 text-white placeholder-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed"
-        disabled={botTyping}
-      />
-      <button
-        type="submit"
-        className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg px-6 py-3 font-medium border border-zinc-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-zinc-800"
-        disabled={botTyping}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-5 h-5"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
+      <div className="max-w-6xl mx-auto">
+        <div className="relative flex items-center gap-3">
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={(e) => onInputChange(e.target.value)}
+            placeholder="Type your message..."
+            className="flex-1 h-12 px-6 bg-zinc-800/80 border border-zinc-700/50 rounded-xl text-base outline-none text-white placeholder-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 focus:border-zinc-600 focus:ring-2 focus:ring-zinc-700/20"
+            disabled={botTyping}
           />
-        </svg>
-        Send
-      </button>
+          <button
+            type="submit"
+            disabled={!input.trim() || botTyping}
+            className="flex items-center justify-center h-12 w-12 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-zinc-800 group"
+            title="Send message"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
     </form>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Navbar from "./Navbar";
 import ChatSidebar from "./ChatSidebar";
 import ChatMessages from "./ChatMessages";
@@ -15,10 +15,16 @@ const ChatUI: React.FC = () => {
   const [loadingChat, setLoadingChat] = useState(false);
   const [botTyping, setBotTyping] = useState(false);
   const [isNewMessage, setIsNewMessage] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
     setMessages(selectedChat.history);
     setIsNewMessage(false);
+    setTimeout(scrollToBottom, 100);
   }, [selectedChat]);
 
   useEffect(() => {
@@ -47,7 +53,7 @@ const ChatUI: React.FC = () => {
       const botMsg: Message = {
         id: Date.now() + 1,
         sender: "bot",
-        text: "This is an agent reply. Fugiat ullamco irure commodo deserunt amet minim cupidatat excepteur cupidatat proident est pariatur proident. Velit magna sint proident cupidatat deserunt ullamco ex. Est deserunt sit labore reprehenderit sunt. Voluptate eu esse ea qui aliquip eiusmod exercitation. Voluptate non nostrud fugiat aliqua ad deserunt sint exercitation excepteur veniam incididunt aliquip cupidatat et. Dolore in amet enim reprehenderit Lorem Lorem velit et et culpa ut elit consectetur dolor.",
+        text: "This is an agent reply.",
       };
       setChats((prevChats) => {
         return prevChats.map((chat) =>
@@ -58,6 +64,7 @@ const ChatUI: React.FC = () => {
       });
       setMessages((msgs) => [...msgs, botMsg]);
       setBotTyping(false);
+      scrollToBottom();
     }, 800);
   };
 
@@ -79,7 +86,10 @@ const ChatUI: React.FC = () => {
     setSelectedChat(newChat);
     setMessages(newChat.history);
     setIsNewMessage(false);
-    setTimeout(() => setIsNewMessage(true), 0);
+    setTimeout(() => {
+      setIsNewMessage(true);
+      scrollToBottom();
+    }, 100);
   };
 
   const handleSelectChat = (chat: Chat) => {
@@ -88,6 +98,7 @@ const ChatUI: React.FC = () => {
       setTimeout(() => {
         setSelectedChat(chat);
         setMessages(chat.history);
+        scrollToBottom();
       }, 500);
     }
   };
@@ -120,6 +131,7 @@ const ChatUI: React.FC = () => {
               botTyping={botTyping}
               isNewMessage={isNewMessage}
             />
+            <div ref={messagesEndRef} />
           </div>
         </div>
         <ChatInput
