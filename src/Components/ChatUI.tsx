@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAccount } from "wagmi";
-import type { Conversation } from "@xmtp/browser-sdk";
+import type { Dm } from "@xmtp/browser-sdk";
 import { useXmtp } from "../contexts/XmtpContext";
 import Navbar from "./Navbar";
 import ChatSidebar from "./ChatSidebar";
@@ -15,9 +15,8 @@ const ChatUI: React.FC = () => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] =
-    useState<Conversation | null>(null);
+  const [conversations, setConversations] = useState<Dm<any>[]>([]);
+  const [selectedConversation, setSelectedConversation] = useState<Dm<any> | null>(null);
   const [input, setInput] = useState("");
   const [loadingChat, setLoadingChat] = useState(false);
   const [botTyping, setBotTyping] = useState(false);
@@ -41,45 +40,33 @@ const ChatUI: React.FC = () => {
 
   // Konuşmaları yükle
   useEffect(() => {
-    // Fix me!!!
     const loadConversations = async () => {
       if (!client) return;
-
       try {
         setLoadingChat(true);
-        const conversations = await client.conversations.list();
-        setConversations(conversations);
-
-        // Konuşmaları sohbetlere dönüştür
+        const dms = await client.conversations.listDms();
+        setConversations(dms);
         const newChats = await Promise.all(
-          conversations.map(async (convo) => {
+          dms.map(async (convo) => {
             const peerAddress = convo.peerAddress;
+            if (typeof peerAddress !== "string" || peerAddress.length < 10) return null;
             const messages = await convo.messages();
-
             return {
               id: peerAddress,
               name: shortAddress(peerAddress),
               avatar: AGENT_AVATAR,
               history: messages
                 .map((msg) => xmtpToAppMessage(msg, address))
-                .sort(
-                  (a, b) =>
-                    (a.timestamp?.getTime() || 0) -
-                    (b.timestamp?.getTime() || 0)
-                ),
+                .sort((a, b) => (a.timestamp?.getTime() || 0) - (b.timestamp?.getTime() || 0)),
             };
           })
         );
-
-        setChats(newChats);
-
-        if (newChats.length > 0 && conversations.length > 0) {
-          const firstChat = newChats[0];
+        const filteredChats = newChats.filter(Boolean) as Chat[];
+        setChats(filteredChats);
+        if (filteredChats.length > 0) {
+          const firstChat = filteredChats[0];
           setSelectedChat(firstChat);
-          setSelectedConversation(
-            conversations.find((c) => c.peerAddress === firstChat.id) ||
-              conversations[0]
-          );
+          setSelectedConversation(dms.find((c) => c.peerAddress === firstChat.id) || dms[0]);
           setMessages(firstChat?.history || []);
         }
       } catch (error) {
@@ -88,40 +75,29 @@ const ChatUI: React.FC = () => {
         setLoadingChat(false);
       }
     };
-
     if (client) {
       loadConversations();
     }
-  }, [client]);
+  }, [client, address]);
 
   // Yeni mesajları dinle
   useEffect(() => {
     if (!client || !selectedConversation) return;
-
     let stream: AsyncGenerator<any>;
-
     const streamMessages = async () => {
       try {
         stream = await selectedConversation.streamMessages();
-
         for await (const message of stream) {
-          const appMessage = xmtpToAppMessage(message, address); // client.address yerine address kullanılıyor
+          const appMessage = xmtpToAppMessage(message, address);
           setMessages((prev) =>
-            [...prev, appMessage].sort(
-              (a, b) =>
-                (a.timestamp?.getTime() || 0) - (b.timestamp?.getTime() || 0)
-            )
+            [...prev, appMessage].sort((a, b) => (a.timestamp?.getTime() || 0) - (b.timestamp?.getTime() || 0))
           );
           setChats((prevChats) => {
             return prevChats.map((chat) =>
               chat.id === selectedChat?.id
                 ? {
                     ...chat,
-                    history: [...chat.history, appMessage].sort(
-                      (a, b) =>
-                        (a.timestamp?.getTime() || 0) -
-                        (b.timestamp?.getTime() || 0)
-                    ),
+                    history: [...chat.history, appMessage].sort((a, b) => (a.timestamp?.getTime() || 0) - (b.timestamp?.getTime() || 0)),
                   }
                 : chat
             );
@@ -132,10 +108,7 @@ const ChatUI: React.FC = () => {
         console.error("Mesaj stream hatası:", error);
       }
     };
-
     streamMessages();
-
-    // Clean up
     return () => {
       if (stream) {
         const closeStream = async () => {
@@ -148,7 +121,7 @@ const ChatUI: React.FC = () => {
         closeStream();
       }
     };
-  }, [client, selectedConversation, selectedChat]);
+  }, [client, selectedConversation, selectedChat, address]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,45 +161,37 @@ const ChatUI: React.FC = () => {
     }
   };
 
+  const DEFAULT_PEER = "0x7c83f09fc37d5cc2c3096c98e57f4e57f4036e2b";
+
   const handleNewChat = async () => {
     if (!client) {
       alert("Önce cüzdanınızı bağlamanız gerekiyor.");
       return;
     }
-
-    const peerAddress = prompt("Mesaj göndermek istediğiniz adres:");
-    if (!peerAddress) return;
-
+    const peerAddress = DEFAULT_PEER;
     try {
       setLoadingChat(true);
-
-      const canMessage = await client.canMessage(peerAddress);
-      if (!canMessage) {
-        alert("Bu adres XMTP ağına kayıtlı değil.");
+      let conversation: Dm<any>;
+      try {
+        conversation = await client.conversations.newDm(peerAddress);
+      } catch {
+        alert("Bu adres XMTP ağına kayıtlı değil veya DM başlatılamıyor.");
         setLoadingChat(false);
         return;
       }
-
-      const conversation = await client.conversations.newConversation(
-        peerAddress
-      );
-
       const newChat: Chat = {
         id: peerAddress,
         name: shortAddress(peerAddress),
         avatar: AGENT_AVATAR,
         history: [],
       };
-
       setConversations((prev) => [...prev, conversation]);
       setChats((prev) => [...prev, newChat]);
       setSelectedChat(newChat);
       setSelectedConversation(conversation);
       setMessages([]);
       setIsNewMessage(false);
-
       await conversation.send("Merhaba! Size XMTP üzerinden ulaştım.");
-
       setIsSidebarOpen(false);
     } catch (error) {
       console.error("Yeni sohbet oluşturulamadı", error);
