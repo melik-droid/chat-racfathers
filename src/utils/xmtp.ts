@@ -4,10 +4,22 @@ import type { Message } from "../Components/chatTypes";
 // XMTP mesajını uygulama mesaj formatına dönüştürme
 export function xmtpToAppMessage(xmtpMsg: DecodedMessage, currentUserAddress?: string): Message {
   const isSenderSelf = currentUserAddress && xmtpMsg.senderInboxId.toLowerCase() === currentUserAddress.toLowerCase();
+  
+  // Ensure content is a string
+  let content: string;
+  if (typeof xmtpMsg.content === 'string') {
+    content = xmtpMsg.content;
+  } else if (xmtpMsg.content instanceof Object) {
+    content = JSON.stringify(xmtpMsg.content);
+  } else {
+    content = String(xmtpMsg.content);
+  }
+
   return {
-    id: xmtpMsg.id, // String olarak bırakın
+    id: xmtpMsg.id,
     sender: isSenderSelf ? "bot" : "user",
-    text: xmtpMsg.content,
+    text: content,
+    timestamp: new Date(), // Use current time if sent time is not available
   };
 }
 
