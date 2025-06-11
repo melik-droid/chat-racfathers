@@ -122,6 +122,10 @@ const ChatUI: React.FC = () => {
     ) => {
       if (message) {
         const appMessage = xmtpToAppMessage(message, DEFAULT_PEER);
+        // Only set botTyping to false if the message is from the agent
+        if (appMessage.sender === "bot") {
+          setBotTyping(false);
+        }
         setMessages((prev) =>
           [...prev, appMessage].sort(
             (a, b) =>
@@ -146,6 +150,7 @@ const ChatUI: React.FC = () => {
       }
       if (error) {
         console.error("Mesaj stream hatası:", error);
+        setBotTyping(false);
       }
     };
 
