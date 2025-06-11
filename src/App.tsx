@@ -5,15 +5,16 @@ import {
   darkTheme,
 } from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
-import { flowTestnet } from "wagmi/chains";
+import { base, mainnet } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import ChatUI from "./Components/ChatUI";
+import { XmtpProvider } from "./contexts/XmtpContext";
 
 const config = getDefaultConfig({
   appName: "Chat Connect",
-  projectId: "YOUR_PROJECT_ID", // Replace with your WalletConnect Project ID
-  chains: [flowTestnet],
+  projectId: "3a71a463aa1d5e0c6e56bbbfae79fab8", // WalletConnect Project ID'nizi buraya ekleyin
+  chains: [base, mainnet],
   ssr: false,
 });
 
@@ -24,7 +25,9 @@ function App() {
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider theme={darkTheme()}>
-          <ChatUI />
+          <XmtpProvider>
+            <ChatUI />
+          </XmtpProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

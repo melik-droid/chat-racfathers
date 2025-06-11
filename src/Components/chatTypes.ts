@@ -1,11 +1,12 @@
 export interface Message {
-  id: number;
-  sender: "user" | "bot";
+  id: string; // number'dan string'e değiştirildi
+  sender: "user" | "bot" | "peer";
   text: string;
+  timestamp?: Date;
 }
 
 export interface Chat {
-  id: number;
+  id: string;
   name: string;
   avatar: string;
   history: Message[];

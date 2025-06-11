@@ -1,6 +1,7 @@
 import React from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import RacfathersLogo from "../assets/RacFathers-Logo.svg";
+import XmtpStatusIndicator from "./XmtpStatusIndicator";
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -8,7 +9,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => (
   <nav className="fixed top-0 left-0 right-0 h-14 bg-zinc-950 border-b border-zinc-800 flex items-center px-6 z-10">
-    <button 
+    <button
       onClick={onMenuClick}
       className="md:hidden rounded-full bg-zinc-800 p-2 hover:bg-zinc-700 transition-colors mr-4"
     >
@@ -29,21 +30,18 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => (
       </svg>
     </button>
     <span className="text-lg font-bold tracking-wide flex items-center gap-2">
-      <a 
-        href="https://racfathers.io/" 
-        target="_blank" 
+      <a
+        href="https://racfathers.io/"
+        target="_blank"
         rel="noopener noreferrer"
         className="hover:opacity-80 transition-opacity"
       >
-        <img
-          src={RacfathersLogo}
-          alt="RacFathers Logo"
-          className="h-[47px]"
-        />
+        <img src={RacfathersLogo} alt="RacFathers Logo" className="h-[47px]" />
       </a>
     </span>
-      
-    <div className="ml-auto flex items-center" style={{ height: "47px" }}>
+
+    <div className="ml-auto flex items-center gap-3" style={{ height: "47px" }}>
+      <XmtpStatusIndicator />
       <ConnectButton />
     </div>
   </nav>

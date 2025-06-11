@@ -7,6 +7,10 @@ export default defineConfig({
   base: '/chat-racfathers/', 
   plugins: [
     react(),
-    tailwindcss()
+    tailwindcss(),
   ],
+  optimizeDeps: {
+    exclude: ["@xmtp/wasm-bindings", "@xmtp/browser-sdk"],
+    include: ["@xmtp/proto"],
+  },
 })
