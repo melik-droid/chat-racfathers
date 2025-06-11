@@ -46,7 +46,9 @@ export const XmtpProvider = ({ children }: { children: ReactNode }) => {
 
   const initializingRef = useRef(false);
 
-  const DEFAULT_PEER = "0x7c83f09fc37d5cc2c3096c98e57f4e57f4036e2b";
+  const DEFAULT_PEER =
+    "5a9d13fa8a62512ca4bf2e50f0f64549d207e53954df080145f435e160878b65";
+  // const DEFAULT_PEER = "0x7c83f09fc37d5cc2c3096c98e57f4e57f4036e2b";
 
   // -------------------------------------------------------------------------
   // Core initialise logic (using createEOASigner only)

@@ -11,12 +11,16 @@ import { xmtpToAppMessage, shortAddress } from "../utils/xmtp";
 import type { Message, Chat } from "./chatTypes";
 import bg from "../assets/bg.png";
 
+const DEFAULT_PEER =
+  "5a9d13fa8a62512ca4bf2e50f0f64549d207e53954df080145f435e160878b65";
+
 const ChatUI: React.FC = () => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Dm<any>[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<Dm<any> | null>(null);
+  const [selectedConversation, setSelectedConversation] =
+    useState<Dm<any> | null>(null);
   const [input, setInput] = useState("");
   const [loadingChat, setLoadingChat] = useState(false);
   const [botTyping, setBotTyping] = useState(false);
@@ -46,18 +50,42 @@ const ChatUI: React.FC = () => {
         setLoadingChat(true);
         const dms = await client.conversations.listDms();
         setConversations(dms);
+
+        const fetchMessages = async (convo: Dm<any>) => {
+          try {
+            // Eğer sync fonksiyonu varsa senkronize etmeye çalışın
+            if (typeof convo.sync === "function") {
+              await convo.sync();
+            }
+          } catch (syncError) {
+            console.error("Konuşma senkronizasyonu başarısız:", syncError);
+          }
+          try {
+            const msgs = await convo.messages();
+            return msgs;
+          } catch (msgError) {
+            console.error("Mesajlar yüklenemedi:", msgError);
+            return [];
+          }
+        };
+
         const newChats = await Promise.all(
           dms.map(async (convo) => {
             const peerAddress = convo.peerAddress;
-            if (typeof peerAddress !== "string" || peerAddress.length < 10) return null;
-            const messages = await convo.messages();
+            if (typeof peerAddress !== "string" || peerAddress.length < 10)
+              return null;
+            const msgs = await fetchMessages(convo);
             return {
               id: peerAddress,
               name: shortAddress(peerAddress),
               avatar: AGENT_AVATAR,
-              history: messages
+              history: msgs
                 .map((msg) => xmtpToAppMessage(msg, address))
-                .sort((a, b) => (a.timestamp?.getTime() || 0) - (b.timestamp?.getTime() || 0)),
+                .sort(
+                  (a, b) =>
+                    (a.timestamp?.getTime() || 0) -
+                    (b.timestamp?.getTime() || 0)
+                ),
             };
           })
         );
@@ -66,8 +94,10 @@ const ChatUI: React.FC = () => {
         if (filteredChats.length > 0) {
           const firstChat = filteredChats[0];
           setSelectedChat(firstChat);
-          setSelectedConversation(dms.find((c) => c.peerAddress === firstChat.id) || dms[0]);
-          setMessages(firstChat?.history || []);
+          setSelectedConversation(
+            dms.find((c) => c.peerAddress === firstChat.id) || dms[0]
+          );
+          setMessages(firstChat.history || []);
         }
       } catch (error) {
         console.error("Konuşmalar yüklenemedi", error);
@@ -83,43 +113,54 @@ const ChatUI: React.FC = () => {
   // Yeni mesajları dinle
   useEffect(() => {
     if (!client || !selectedConversation) return;
-    let stream: AsyncGenerator<any>;
-    const streamMessages = async () => {
-      try {
-        stream = await selectedConversation.streamMessages();
-        for await (const message of stream) {
-          const appMessage = xmtpToAppMessage(message, address);
-          setMessages((prev) =>
-            [...prev, appMessage].sort((a, b) => (a.timestamp?.getTime() || 0) - (b.timestamp?.getTime() || 0))
-          );
-          setChats((prevChats) => {
-            return prevChats.map((chat) =>
-              chat.id === selectedChat?.id
-                ? {
-                    ...chat,
-                    history: [...chat.history, appMessage].sort((a, b) => (a.timestamp?.getTime() || 0) - (b.timestamp?.getTime() || 0)),
-                  }
-                : chat
-            );
-          });
-          scrollToBottom();
-        }
-      } catch (error) {
+
+    const noop = () => {};
+
+    const onMessage = (
+      error: Error | null,
+      message: any // DecodedMessage<ContentTypes> yerine mevcut message tipinizi kullanın
+    ) => {
+      if (message) {
+        const appMessage = xmtpToAppMessage(message, DEFAULT_PEER);
+        setMessages((prev) =>
+          [...prev, appMessage].sort(
+            (a, b) =>
+              (a.timestamp?.getTime() || 0) - (b.timestamp?.getTime() || 0)
+          )
+        );
+        setChats((prevChats) =>
+          prevChats.map((chat) =>
+            chat.id === selectedChat?.id
+              ? {
+                  ...chat,
+                  history: [...chat.history, appMessage].sort(
+                    (a, b) =>
+                      (a.timestamp?.getTime() || 0) -
+                      (b.timestamp?.getTime() || 0)
+                  ),
+                }
+              : chat
+          )
+        );
+        scrollToBottom();
+      }
+      if (error) {
         console.error("Mesaj stream hatası:", error);
       }
     };
-    streamMessages();
-    return () => {
-      if (stream) {
-        const closeStream = async () => {
-          try {
-            await stream.return?.();
-          } catch (e) {
-            console.log("Stream kapatılırken hata:", e);
+
+    const startStream = async () => {
+      const stream = await selectedConversation.stream(onMessage);
+      return stream
+        ? () => {
+            void stream.return(undefined);
           }
-        };
-        closeStream();
-      }
+        : noop;
+    };
+
+    const cleanupPromise = startStream();
+    return () => {
+      cleanupPromise.then((cleanup) => cleanup());
     };
   }, [client, selectedConversation, selectedChat, address]);
 
@@ -138,13 +179,13 @@ const ChatUI: React.FC = () => {
         timestamp: sentTimestamp,
       };
 
-      setMessages((msgs) => {
-        return [...msgs, newMsg].sort((a, b) => {
-          const aTime = a.timestamp ? a.timestamp.getTime() : 0;
-          const bTime = b.timestamp ? b.timestamp.getTime() : 0;
-          return aTime - bTime;
-        });
-      });
+      // setMessages((msgs) => {
+      //   return [...msgs, newMsg].sort((a, b) => {
+      //     const aTime = a.timestamp ? a.timestamp.getTime() : 0;
+      //     const bTime = b.timestamp ? b.timestamp.getTime() : 0;
+      //     return aTime - bTime;
+      //   });
+      // });
       const currentInput = input;
       setInput("");
       setBotTyping(true);
@@ -155,13 +196,11 @@ const ChatUI: React.FC = () => {
       scrollToBottom();
     } catch (error) {
       console.error("Mesaj gönderilemedi", error);
-      setMessages((prev) => prev.filter((m) => m.id !== newMsg.id));
+      // setMessages((prev) => prev.filter((m) => m.id !== newMsg.id));
       setInput(newMsg.text);
       setBotTyping(false);
     }
   };
-
-  const DEFAULT_PEER = "0x7c83f09fc37d5cc2c3096c98e57f4e57f4036e2b";
 
   const handleNewChat = async () => {
     if (!client) {
@@ -185,6 +224,7 @@ const ChatUI: React.FC = () => {
         avatar: AGENT_AVATAR,
         history: [],
       };
+      console.log("New Conversation: ", conversation);
       setConversations((prev) => [...prev, conversation]);
       setChats((prev) => [...prev, newChat]);
       setSelectedChat(newChat);

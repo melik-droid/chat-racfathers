@@ -3,12 +3,11 @@ import type { Message } from "../Components/chatTypes";
 
 // XMTP mesajını uygulama mesaj formatına dönüştürme
 export function xmtpToAppMessage(xmtpMsg: DecodedMessage, currentUserAddress?: string): Message {
-  const isSenderSelf = currentUserAddress && xmtpMsg.senderAddress.toLowerCase() === currentUserAddress.toLowerCase();
+  const isSenderSelf = currentUserAddress && xmtpMsg.senderInboxId.toLowerCase() === currentUserAddress.toLowerCase();
   return {
     id: xmtpMsg.id, // String olarak bırakın
-    sender: isSenderSelf ? "user" : "bot",
+    sender: isSenderSelf ? "bot" : "user",
     text: xmtpMsg.content,
-    timestamp: xmtpMsg.sent, // Gönderilme zamanını ekleyin
   };
 }
 
