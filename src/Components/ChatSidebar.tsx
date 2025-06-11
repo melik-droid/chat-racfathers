@@ -21,12 +21,12 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
     <aside className="w-72 h-full bg-zinc-900/95 backdrop-blur-sm border-r border-zinc-800 flex flex-col pt-14 md:relative">
       <div className="px-4 py-3 border-b border-zinc-800">
         <h2 className="text-lg font-semibold text-white">
-          {isXmtpEnabled ? "XMTP Sohbetleri" : "Sohbetler"}
+          Consigliere XMTP Chats
         </h2>
         <p className="text-sm text-zinc-400">
           {isXmtpEnabled
-            ? "Cüzdanlar arası şifrelenmiş mesajlaşma"
-            : "Sohbet geçmişiniz"}
+            ? "Encrypted messaging with Consigliere"
+            : "Your chat history"}
         </p>
       </div>
 
@@ -34,8 +34,8 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
         {chats.length === 0 && (
           <div className="text-center text-zinc-500 py-8">
             {isXmtpEnabled
-              ? "Henüz bir sohbetiniz yok. Yeni bir sohbet başlatın."
-              : "Cüzdanınızı bağlayın ve XMTP'ye katılın."}
+              ? "You don't have a chat yet. Start a new chat."
+              : "Connect your wallet and join Consigliere on XMTP."}
           </div>
         )}
 
@@ -67,7 +67,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
               </p>
               <p className="text-xs text-zinc-400 truncate">
                 {chat.history[chat.history.length - 1]?.text ||
-                  "Henüz mesaj yok"}
+                  "No messages yet"}
               </p>
             </div>
           </button>
@@ -94,7 +94,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
               d="M12 4.5v15m7.5-7.5h-15"
             />
           </svg>
-          <span className="font-medium">Yeni Sohbet</span>
+          <span className="font-medium">New Chat</span>
         </button>
       </div>
     </aside>

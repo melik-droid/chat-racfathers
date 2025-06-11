@@ -10,7 +10,7 @@ const XmtpStatusIndicator: React.FC = () => {
     return (
       <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 rounded-lg text-zinc-300 text-sm">
         <span className="w-2 h-2 rounded-full bg-red-500"></span>
-        Cüzdan Bağlanmadı
+        Wallet Not Connected
       </div>
     );
   }
@@ -19,7 +19,7 @@ const XmtpStatusIndicator: React.FC = () => {
     return (
       <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 rounded-lg text-zinc-300 text-sm">
         <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
-        XMTP Yükleniyor...
+        XMTP Loading...
       </div>
     );
   }
@@ -28,7 +28,7 @@ const XmtpStatusIndicator: React.FC = () => {
     return (
       <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 rounded-lg text-zinc-300 text-sm">
         <span className="w-2 h-2 rounded-full bg-green-500"></span>
-        XMTP Bağlı
+        XMTP Connected
       </div>
     );
   }
@@ -39,7 +39,7 @@ const XmtpStatusIndicator: React.FC = () => {
       className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-zinc-300 text-sm transition-colors"
     >
       <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-      XMTP'yi Etkinleştir
+      Enable XMTP
     </button>
   );
 };

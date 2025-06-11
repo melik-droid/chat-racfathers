@@ -1,5 +1,5 @@
 export interface Message {
-  id: string; // number'dan string'e değiştirildi
+  id: string;
   sender: "user" | "bot" | "peer";
   text: string;
   timestamp?: Date;
@@ -10,4 +10,5 @@ export interface Chat {
   name: string;
   avatar: string;
   history: Message[];
+
 }

@@ -22,7 +22,9 @@ const ChatUI: React.FC = () => {
   const [selectedConversation, setSelectedConversation] =
     useState<Dm<any> | null>(null);
   const [input, setInput] = useState("");
-  const [loadingStates, setLoadingStates] = useState<Map<string, boolean>>(new Map());
+  const [loadingStates, setLoadingStates] = useState<Map<string, boolean>>(
+    new Map()
+  );
   const [botTyping, setBotTyping] = useState(false);
   const [isNewMessage, setIsNewMessage] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -44,7 +46,7 @@ const ChatUI: React.FC = () => {
 
   // Helper function to update loading state for a specific chat
   const setChatLoading = (chatId: string, isLoading: boolean) => {
-    setLoadingStates(prev => {
+    setLoadingStates((prev) => {
       const newMap = new Map(prev);
       newMap.set(chatId, isLoading);
       return newMap;
@@ -62,7 +64,7 @@ const ChatUI: React.FC = () => {
       if (!client) return;
       try {
         const dms = await client.conversations.listDms();
-        console.log('Loaded DMs:', dms);
+        console.log("Loaded DMs:", dms);
         setConversations(dms);
 
         const fetchMessages = async (convo: Dm<any>) => {
@@ -75,7 +77,7 @@ const ChatUI: React.FC = () => {
           }
           try {
             const msgs = await convo.messages();
-            console.log('Fetched messages for conversation:', msgs);
+            console.log("Fetched messages for conversation:", msgs);
             return msgs;
           } catch (msgError) {
             console.error("Mesajlar yüklenemedi:", msgError);
@@ -87,15 +89,16 @@ const ChatUI: React.FC = () => {
           dms.map(async (convo) => {
             // Use the conversation's topic or ID as the chat ID
             const convoId = convo.topic || convo.id || `convo-${Date.now()}`;
-            console.log('Processing conversation with ID:', convoId);
+            console.log("Processing conversation with ID:", convoId);
             setChatLoading(convoId, true);
             const msgs = await fetchMessages(convo);
             setChatLoading(convoId, false);
 
             // Ensure we're not trying to render any objects directly
-            const chatName = typeof convo.peerAddress === 'string' 
-              ? shortAddress(convo.peerAddress)
-              : shortAddress(DEFAULT_PEER);
+            const chatName =
+              typeof convo.peerAddress === "string"
+                ? shortAddress(convo.peerAddress)
+                : shortAddress(DEFAULT_PEER);
 
             return {
               id: convoId,
@@ -111,13 +114,14 @@ const ChatUI: React.FC = () => {
             };
           })
         );
-        console.log('Created new chats:', newChats);
+
+        console.log("Created new chats:", newChats);
         const filteredChats = newChats.filter(Boolean) as Chat[];
-        console.log('Filtered chats:', filteredChats);
+        console.log("Filtered chats:", filteredChats);
         setChats(filteredChats);
         if (filteredChats.length > 0) {
           const firstChat = filteredChats[0];
-          console.log('Setting first chat as selected:', firstChat);
+          console.log("Setting first chat as selected:", firstChat);
           setSelectedChat(firstChat);
           setSelectedConversation(dms[0]); // Just use the first conversation for now
           setMessages(firstChat.history || []);
@@ -137,10 +141,7 @@ const ChatUI: React.FC = () => {
 
     const noop = () => {};
 
-    const onMessage = (
-      error: Error | null,
-      message: any
-    ) => {
+    const onMessage = (error: Error | null, message: any) => {
       if (message) {
         const appMessage = xmtpToAppMessage(message, DEFAULT_PEER);
         // Only set botTyping to false if the message is from the agent
@@ -228,7 +229,7 @@ const ChatUI: React.FC = () => {
 
   const handleNewChat = async () => {
     if (!client) {
-      alert("Önce cüzdanınızı bağlamanız gerekiyor.");
+      alert("You need to connect your wallet first.");
       return;
     }
     const peerAddress = DEFAULT_PEER;
@@ -238,7 +239,9 @@ const ChatUI: React.FC = () => {
       try {
         conversation = await client.conversations.newDm(peerAddress);
       } catch {
-        alert("Bu adres XMTP ağına kayıtlı değil veya DM başlatılamıyor.");
+        alert(
+          "This address is not registered on the XMTP network or DM cannot be initiated."
+        );
         setChatLoading(peerAddress, false);
         return;
       }
@@ -255,7 +258,7 @@ const ChatUI: React.FC = () => {
       setSelectedConversation(conversation);
       setMessages([]);
       setIsNewMessage(false);
-      await conversation.send("Merhaba! Size XMTP üzerinden ulaştım.");
+      await conversation.send("Hi Consigliere!");
       setIsSidebarOpen(false);
     } catch (error) {
       console.error("Yeni sohbet oluşturulamadı", error);
@@ -265,38 +268,38 @@ const ChatUI: React.FC = () => {
   };
 
   const handleSelectChat = (chat: Chat) => {
-    console.log('handleSelectChat called with chat:', chat);
-    console.log('Current selectedChat:', selectedChat);
-    console.log('Current conversations:', conversations);
-    
+    console.log("handleSelectChat called with chat:", chat);
+    console.log("Current selectedChat:", selectedChat);
+    console.log("Current conversations:", conversations);
+
     if (selectedChat?.id !== chat.id) {
       setChatLoading(chat.id, true);
       // Extract the peer address from the chat ID (remove the timestamp part)
-      const peerAddress = chat.id.split('-')[0];
-      console.log('Extracted peerAddress:', peerAddress);
-      
+      const peerAddress = chat.id.split("-")[0];
+      console.log("Extracted peerAddress:", peerAddress);
+
       // Find the conversation by matching the chat history
       const conversation = conversations.find((c) => {
-        console.log('Checking conversation:', c);
+        console.log("Checking conversation:", c);
         // Check if this conversation has messages that match our chat history
         return chat.history.length > 0 && c.messages && c.messages.length > 0;
       });
-      
-      console.log('Found conversation:', conversation);
-      
+
+      console.log("Found conversation:", conversation);
+
       if (conversation) {
         setSelectedConversation(conversation);
         setSelectedChat(chat);
         setMessages(chat.history);
-        console.log('Updated selected chat and conversation');
-        console.log('New messages:', chat.history);
+        console.log("Updated selected chat and conversation");
+        console.log("New messages:", chat.history);
       } else {
-        console.log('No matching conversation found!');
+        console.log("No matching conversation found!");
       }
       setChatLoading(chat.id, false);
       scrollToBottom();
     } else {
-      console.log('Same chat selected, no change needed');
+      console.log("Same chat selected, no change needed");
     }
   };
 
@@ -343,7 +346,7 @@ const ChatUI: React.FC = () => {
                 onClick={initialize}
                 className="px-6 py-3 bg-zinc-800 rounded-lg hover:bg-zinc-700 transition-colors"
               >
-                XMTP'ye Bağlan
+                Connect to XMTP
               </button>
             </div>
           )}
@@ -352,7 +355,9 @@ const ChatUI: React.FC = () => {
             <div className="relative z-10 h-full">
               <ChatMessages
                 messages={messages}
-                loadingChat={selectedChat ? isChatLoading(selectedChat.id) : false}
+                loadingChat={
+                  selectedChat ? isChatLoading(selectedChat.id) : false
+                }
                 botTyping={botTyping}
                 isNewMessage={isNewMessage}
               />

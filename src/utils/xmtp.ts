@@ -15,9 +15,17 @@ export function xmtpToAppMessage(xmtpMsg: DecodedMessage, currentUserAddress?: s
     content = String(xmtpMsg.content);
   }
 
+  const DEFAULT_PEER =
+  "5a9d13fa8a62512ca4bf2e50f0f64549d207e53954df080145f435e160878b65";
+
+  const sender =
+    xmtpMsg.senderInboxId === DEFAULT_PEER
+      ? "bot"
+      : "user";
+
   return {
     id: xmtpMsg.id,
-    sender: isSenderSelf ? "bot" : "user",
+    sender: sender,
     text: content,
     timestamp: new Date(), // Use current time if sent time is not available
   };
