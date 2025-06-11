@@ -87,25 +87,22 @@ const ChatUI: React.FC = () => {
 
         const newChats = await Promise.all(
           dms.map(async (convo) => {
-            // Use the conversation's topic or ID as the chat ID
-            const convoId = convo.topic || convo.id || `convo-${Date.now()}`;
+            // Use the conversation's  ID as the chat ID
+            const convoId = convo.id || `convo-${Date.now()}`;
             console.log("Processing conversation with ID:", convoId);
             setChatLoading(convoId, true);
             const msgs = await fetchMessages(convo);
             setChatLoading(convoId, false);
 
             // Ensure we're not trying to render any objects directly
-            const chatName =
-              typeof convo.peerAddress === "string"
-                ? shortAddress(convo.peerAddress)
-                : shortAddress(DEFAULT_PEER);
+            const chatName = shortAddress(DEFAULT_PEER);
 
             return {
               id: convoId,
               name: chatName,
               avatar: AGENT_AVATAR,
               history: msgs
-                .map((msg) => xmtpToAppMessage(msg, address))
+                .map((msg) => xmtpToAppMessage(msg))
                 .sort(
                   (a, b) =>
                     (a.timestamp?.getTime() || 0) -
@@ -143,7 +140,7 @@ const ChatUI: React.FC = () => {
 
     const onMessage = (error: Error | null, message: any) => {
       if (message) {
-        const appMessage = xmtpToAppMessage(message, DEFAULT_PEER);
+        const appMessage = xmtpToAppMessage(message);
         // Only set botTyping to false if the message is from the agent
         if (appMessage.sender === "bot") {
           setBotTyping(false);
@@ -192,17 +189,17 @@ const ChatUI: React.FC = () => {
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || !selectedConversation || !client) return;
-    let newMsg: Message;
+    // let newMsg: Message;
     try {
-      const tempId = `temp-${Date.now()}`;
-      const sentTimestamp = new Date();
+      // const tempId = `temp-${Date.now()}`;
+      // const sentTimestamp = new Date();
 
-      newMsg = {
-        id: tempId,
-        sender: "user",
-        text: input,
-        timestamp: sentTimestamp,
-      };
+      // newMsg = {
+      //   id: tempId,
+      //   sender: "user",
+      //   text: input,
+      //   timestamp: sentTimestamp,
+      // };
 
       // setMessages((msgs) => {
       //   return [...msgs, newMsg].sort((a, b) => {
@@ -222,7 +219,7 @@ const ChatUI: React.FC = () => {
     } catch (error) {
       console.error("Mesaj gönderilemedi", error);
       // setMessages((prev) => prev.filter((m) => m.id !== newMsg.id));
-      setInput(newMsg.text);
+      // setInput(newMsg.text);
       setBotTyping(false);
     }
   };

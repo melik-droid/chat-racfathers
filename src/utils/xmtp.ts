@@ -2,8 +2,7 @@ import { DecodedMessage } from "@xmtp/browser-sdk";
 import type { Message } from "../Components/chatTypes";
 
 // XMTP mesajını uygulama mesaj formatına dönüştürme
-export function xmtpToAppMessage(xmtpMsg: DecodedMessage, currentUserAddress?: string): Message {
-  const isSenderSelf = currentUserAddress && xmtpMsg.senderInboxId.toLowerCase() === currentUserAddress.toLowerCase();
+export function xmtpToAppMessage(xmtpMsg: DecodedMessage): Message {
   
   // Ensure content is a string
   let content: string;
@@ -14,7 +13,6 @@ export function xmtpToAppMessage(xmtpMsg: DecodedMessage, currentUserAddress?: s
   } else {
     content = String(xmtpMsg.content);
   }
-
   const DEFAULT_PEER =
   "5a9d13fa8a62512ca4bf2e50f0f64549d207e53954df080145f435e160878b65";
 
