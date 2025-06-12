@@ -60,7 +60,7 @@ export const XmtpProvider = ({ children }: { children: ReactNode }) => {
     const signer = createEOASigner(address, (msg: string) =>
       walletClient.signMessage({ message: msg })
     );
-    const c = await Client.create(signer, { env: "production" });
+    const c = await Client.create(signer, { env: "dev" });
     return c;
   };
 
